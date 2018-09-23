@@ -4,32 +4,7 @@ import { handleSaveQuestionAnswer } from '../actions/questions';
 
 class QuestionPage extends Component {
 
-    constructor(props) {
-        super(props)
-        const { authedUser, question } = props
-        this.state = {
-          userVote: this.getUserVote(authedUser.id, question),
-        }
-        console.log('constructing with state', this.state)
-    }
-
-    getUserVote (user, question) {
-
-        if (question.optionOne.votes.includes(user)) {
-            return 'optionOne'
-        }
-
-        else if (question.optionTwo.votes.includes(user)) {
-            return 'optionTwo'
-        }
-
-        else {
-            return null
-        }
-    
-    }
-
-    toggleAnswer = (event) => {
+    handleRadioChange = (event) => {
 
         event.preventDefault()
 
@@ -41,60 +16,122 @@ class QuestionPage extends Component {
             answer: event.currentTarget.value
         }
 
-        console.log(info)
-        
         dispatch(handleSaveQuestionAnswer(info))
 
     }
 
+    renderHelper() {
+        
+        const { question, author, userVote } = this.props
+        
+        if ( userVote === null ) {
+
+            return(
+                
+                <div className='center'>
+                    <h3>Would You Rather</h3>
+                    <img className="avatar" src={author.avatarURL} alt={author.name} ></img>
+                    <form>
+                        <label htmlFor='optionOne'>{question.optionOne.text}</label>
+                        <input
+                            id='optionOne'
+                            name="answer"
+                            type="radio"
+                            value="optionOne"
+                            disabled={ userVote !== null }
+                            checked={ userVote === 'optionOne' }
+                            onChange={this.handleRadioChange} />
+                
+                        <label htmlFor='optionTwo'>{question.optionTwo.text}</label>
+                        <input
+                            id='optionTwo'
+                            name="answer"
+                            type="radio"
+                            value="optionTwo"
+                            disabled={ userVote !== null }
+                            checked={ userVote === 'optionTwo' }
+                            onChange={this.handleRadioChange} />
+                
+                    </form>
+                </div>
+            )
+
+        }
+
+        else {
+
+            
+            
+            const optionOneVoteCount = question.optionOne.votes.length
+            const optionTwoVoteCount = question.optionTwo.votes.length
+            const voteCount = optionOneVoteCount + optionTwoVoteCount
+
+            return (
+                <div className='center'>
+                    <h3>Would You Rather</h3>
+                    <img className="avatar" src={author.avatarURL} alt={author.name} ></img>
+                    
+                    <div className={ userVote === 'optionOne' ? 'option selected' : 'option'} >
+                        <h4>{question.optionOne.text}</h4>
+                        <ul>
+                            <li>Votes (#): {optionOneVoteCount}</li>
+                            <li>Votes (% of all): { ((optionOneVoteCount/voteCount) * 100).toFixed(2) }%</li>
+                        </ul>
+                    </div>
+                    <div className={ userVote === 'optionTwo' ? 'option selected' : 'option'} >
+                        <h4>{question.optionTwo.text}</h4>
+                        <ul>
+                            <li>Votes (#): {optionTwoVoteCount}</li>
+                            <li>Votes (% of all): { ((optionTwoVoteCount/voteCount) * 100).toFixed(2) }%</li>
+                        </ul>
+                    </div>
+                </div>
+            )
+
+        }
+    }
+
     render() {            
         
-        const { question, author } = this.props
-        const { userVote } = this.state
-
         return (                
-        
-        <div className='center'>
-            <h3>Would You Rather</h3>
-            <img className="avatar" src={author.avatarURL} alt={author.name} ></img>
-            <form>
-                <label htmlFor='optionOne'>{question.optionOne.text}</label>
-                <input
-                    id='optionOne'
-                    name="answer"
-                    type="radio"
-                    value="optionOne"
-                    checked={userVote === 'optionOne'}
-                    onChange={this.toggleAnswer} />
-         
-                <label htmlFor='optionTwo'>{question.optionTwo.text}</label>
-                <input
-                    id='optionTwo'
-                    name="answer"
-                    type="radio"
-                    value="optionTwo"
-                    checked={userVote === 'optionTwo'}
-                    onChange={this.toggleAnswer} />
-         
-            </form>
-            
-            
-        </div>
 
+            this.renderHelper()
+            
         )
     }
+
+    
+
 }
 
 function mapStateToProps({ authedUser, users, questions }, props) {
 
     const { id } = props.match.params
     const question = questions[id];
-    const author = users[question.author]
+    const author = users[question.author];
+    const userVote = getUserVote(authedUser.id, question);
 
     return {
         authedUser,
         question,
-        author   
+        author,
+        userVote   
+    }
+
+}
+
+function getUserVote (user, question) {
+
+    if (question.optionOne.votes.includes(user)) {
+        return 'optionOne'
+    }
+
+    else if (question.optionTwo.votes.includes(user)) {
+        return 'optionTwo'
+    }
+
+    else {
+        return null
     }
 
 }
