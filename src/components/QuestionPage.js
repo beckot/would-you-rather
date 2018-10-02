@@ -6,8 +6,6 @@ class QuestionPage extends Component {
 
     handleRadioChange = (event) => {
 
-        event.preventDefault()
-
         const { dispatch, authedUser, question } = this.props
         
         let info = {
@@ -22,9 +20,14 @@ class QuestionPage extends Component {
 
     renderHelper() {
         
-        const { question, author, userVote } = this.props
+        const { question, author, userVote, notFound } = this.props
         
-        if ( userVote === null ) {
+        if (notFound === true ) {
+            return (
+                <div>Error: no question with ID <strong>{this.props.match.params.id}</strong></div>
+            )
+        }
+        else if ( userVote === null ) {
 
             return(
                 
@@ -107,15 +110,29 @@ class QuestionPage extends Component {
 function mapStateToProps({ authedUser, users, questions }, props) {
 
     const { id } = props.match.params
-    const question = questions[id];
-    const author = users[question.author];
-    const userVote = getUserVote(authedUser.id, question);
 
-    return {
-        authedUser,
-        question,
-        author,
-        userVote   
+    console.log(questions[id])
+
+    if (questions[id]) { 
+
+        const question = questions[id];
+        const author = users[question.author];
+        const userVote = getUserVote(authedUser.id, question);
+
+        return {
+            authedUser,
+            question,
+            author,
+            userVote,
+            notFound: false   
+        }
+
+    }
+
+    else {
+        return {
+            notFound: true
+        }
     }
 
 }

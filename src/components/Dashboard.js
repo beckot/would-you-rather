@@ -1,85 +1,100 @@
 import React, { Component } from 'react'
-import {connect} from 'react-redux';
-import QuestionPage from './QuestionPage';
+import {connect} from 'react-redux'
+import {Link} from 'react-router-dom'
+
+const UNANSWERED_QUESTION_FILTER = 'unanswered'
+const ANSWERED_QUESTION_FILTER = 'answered'
+
 
 class Dashboard extends Component {
   
   constructor(props) {
+    
     super(props)
-    let { sortedQuestions, authedUser } = props
+        
     this.state = {
-      questionFilter: 'unanswered',
-      visibleQuestions: sortedQuestions
-        .filter( question => { 
-          return(
-            !(question.optionOne.votes.includes(authedUser)) &&
-            !(question.optionTwo.votes.includes(authedUser))
-          )
-        }) 
+      questionFilter: UNANSWERED_QUESTION_FILTER,
+      sortedAndFilteredQuestions: this.sortAndFilterQuestions(UNANSWERED_QUESTION_FILTER)
     }
-    this.handleRadioChange = this.handleRadioChange.bind(this)
+
   }
+  
+  sortAndFilterQuestions = (questionFilter) => {
+    
+    const { questions, userAnsweredQuestionIds } = this.props
 
-  handleRadioChange (event) {
+    console.log(userAnsweredQuestionIds)
 
-    event.preventDefault()
+    switch (questionFilter) {
 
-    let { sortedQuestions, authedUser } = this.props
-    let newQuestions = sortedQuestions
-    let eventValue = event.target.value
-
-    if ( eventValue === 'unanswered') {
-      console.log('unanswered questions displayed...')
-      newQuestions = newQuestions.filter( question => { 
-        return(
-          !(question.optionOne.votes.includes(authedUser)) &&
-          !(question.optionTwo.votes.includes(authedUser))
+      case UNANSWERED_QUESTION_FILTER :
+        return (
+          Object.keys(questions)
+            .filter(key => !userAnsweredQuestionIds.includes(key))
+            .sort((a,b) => questions[b].timestamp - questions[a].timestamp)  
+            .map(id => questions[id])
         )
-      })
-    } else if (eventValue === 'answered') {
-      newQuestions = newQuestions.filter( question => {
-        return(
-          (question.optionOne.votes.includes(authedUser)) ||
-          (question.optionTwo.votes.includes(authedUser))
+      
+      case ANSWERED_QUESTION_FILTER :
+        return (
+          userAnsweredQuestionIds
+            .sort((a,b) => questions[b].timestamp - questions[a].timestamp)  
+            .map(id => questions[id])
         )
-      })
+      
+        
+      default : 
+          return questions
+
     }
+   
+  }
+  
+  handleRadioChange = (event) => {
+
+    const newFilter = event.target.value
+    const newQuestions = this.sortAndFilterQuestions(newFilter)
+
+    console.log(newQuestions)
 
     this.setState({
-      questionFilter: event.target.value,
-      visibleQuestions: newQuestions
+      questionFilter: newFilter,
+      sortedAndFilteredQuestions: newQuestions
     })
 
   }
 
   render() {
-  
+    
+    const { sortedAndFilteredQuestions } = this.state
+
     return (
       <div>
-        <h3>Recent Polls</h3>
+        <h3>Recent Questions</h3>
         <div>
           <input 
             type="radio"
             value="unanswered" 
             name="visible-polls"
             onChange={this.handleRadioChange} 
-            checked={this.state.questionFilter === 'unanswered'} />
+            checked={this.state.questionFilter === UNANSWERED_QUESTION_FILTER} />
             Unsanswered
           <input 
             type="radio"
             value="answered"
             onChange={this.handleRadioChange}
             name="visible-polls"
-            checked={this.state.questionFilter === 'answered'}/> 
+            checked={this.state.questionFilter === ANSWERED_QUESTION_FILTER}/> 
             Answered
         </div>
         <ul className='question-list' >
           {
-            this.state.visibleQuestions.map((question) => {
+            sortedAndFilteredQuestions.map((question) => {
               return ( 
                 <li key={question.id}>
-                  {question.id}: <a href="#">{question.optionOne.text} <strong>OR</strong> {question.optionTwo.text}?</a>
-                  <QuestionPage id={question.id} />
+                  <Link to={`/question/${question.id}`}>
+                    Would you rather <strong>{question.optionOne.text}</strong> or <strong>{question.optionTwo.text}</strong>?
+                  </Link>
                 </li>
               )
             })
@@ -90,16 +105,15 @@ class Dashboard extends Component {
   }
 }
 
-function mapStateToProps ({ questions, authedUser }) {
-  
-  const sortedQuestions = {}
-
+function mapStateToProps ({ questions, users, authedUser }) {
+   
   return {
-      authedUser: authedUser.id,
-      sortedQuestions: Object.keys(questions)
-        .sort()
-        .map( key => sortedQuestions[key] = questions[key])
+    questions,
+    userAnsweredQuestionIds: Object.keys(users[authedUser.id].answers) 
   }
 }
+
+
+
 
 export default connect(mapStateToProps)(Dashboard);

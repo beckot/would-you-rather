@@ -1,12 +1,14 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { handleAddQuestion } from '../actions/questions'
+import { Redirect } from 'react-router-dom'
 
 export class NewQuestion extends Component {
 
     state = {
         optionOne: '',
-        optionTwo: ''
+        optionTwo: '',
+        toHome: false,
     }
 
     handleChange = (event) => {
@@ -27,14 +29,13 @@ export class NewQuestion extends Component {
         event.preventDefault()
         
         const { optionOne, optionTwo } = this.state
-
-        handleAddQuestion(optionOne, optionTwo)
-
-        console.log(`New question with options. optionOne: ${optionOne}, optionTwo: ${optionTwo}.`)
+        
+        this.props.dispatch(handleAddQuestion(optionOne, optionTwo))
 
         this.setState( () => ({
             optionOne: '',
-            optionTwo: ''
+            optionTwo: '',
+            toHome: true,
         }))
 
     }
@@ -42,13 +43,17 @@ export class NewQuestion extends Component {
 
     render() {
 
-        const { optionOne, optionTwo } = this.state
+        const { optionOne, optionTwo, toHome } = this.state
+        
+        if ( toHome === true ) {
+            return <Redirect to='/' />
+        }
 
         return (
             <div>
                 <h3 className='center'>New Question</h3>
                 <h4 className='center'>Would you rather...</h4>
-                <form className='new-question' onSubmit={this.handleSubmit}>
+                <form className='new-question center' onSubmit={this.handleSubmit}>
                     <input
                         name='optionOne'
                         type='text'
