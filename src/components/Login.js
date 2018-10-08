@@ -1,35 +1,47 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
+import { handleInitialData } from '../actions/shared'
+import { setAuthedUser } from '../actions/authedUser'
 
-class Login extends Component {
+export class Login extends Component {
 
     constructor() {
+        
         super();
         
         this.state = {
             showMenu: false,
         };
         
-        // this.showMenu = this.showMenu.bind(this);
-        // this.closeMenu = this.closeMenu.bind(this);
+    }
+
+    componentDidMount() {
+        this.props.dispatch(handleInitialData())
     }
       
     showMenu = (event) => {
         event.preventDefault();
         
         this.setState({ showMenu: true }, () => {
-        document.addEventListener('click', this.closeMenu);
+            document.addEventListener('click', this.closeMenu);
         });
     }
     
     closeMenu = () => {
         this.setState({ showMenu: false }, () => {
-        document.removeEventListener('click', this.closeMenu);
+            document.removeEventListener('click', this.closeMenu);
         });
     }
 
-    handleClick = (buttonValue) => {
-        console.log('clicked:', buttonValue)
+    handleClick = (event) => {
+        
+        event.preventDefault()
+        this.props.dispatch(setAuthedUser(event.target.value))
+    
+    }
+
+    componentWillUnmount = () => {
+        document.removeEventListener("click", this.closeMenu);
     }
 
     render() {
@@ -37,8 +49,8 @@ class Login extends Component {
         const {users} = this.props
 
         return (
-            <div class="dropdown">
-            <button class="dropbtn" onClick={this.showMenu}>
+            <div className="dropdown">
+            <button className="dropbtn" onClick={this.showMenu}>
                 Login as User...
             </button>
 
@@ -46,10 +58,10 @@ class Login extends Component {
 
                 this.state.showMenu 
                 ? (
-                    <div class="dropdown-content">
+                    <div className="dropdown-content">
                         {Object.keys(users).map(key => {
                             return(
-                                <button key={users[key].id} onClick={this.handleClick(users[key].id)}>
+                                <button key={users[key].id} value={users[key].id} onClick={this.handleClick}>
                                     {users[key].name}
                                 </button>
                             )

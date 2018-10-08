@@ -33,8 +33,8 @@ function Leaderboard(props) {
             <TableRow>
                 <TableCell>Rank (#)</TableCell>
                 <TableCell colSpan={2}>User</TableCell>
-                <TableCell >Asked</TableCell>
                 <TableCell >Answered</TableCell>
+                <TableCell >Asked</TableCell>
             </TableRow>
             </TableHead>
             <TableBody>

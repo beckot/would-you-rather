@@ -23,11 +23,16 @@ class Dashboard extends Component {
     
     const { questions, userAnsweredQuestionIds } = this.props
 
-    console.log(userAnsweredQuestionIds)
+    console.log('running sortAndFilterQuestions filter ', questionFilter)
+    console.log('running sortAndFilterQuestions questions', questions)
+    console.log('running sortAndFilterQuestions userAnsweredQuestionIds', userAnsweredQuestionIds)
 
     switch (questionFilter) {
 
       case UNANSWERED_QUESTION_FILTER :
+
+        console.log('questionFilter', questionFilter)
+
         return (
           Object.keys(questions)
             .filter(key => !userAnsweredQuestionIds.includes(key))
@@ -36,6 +41,9 @@ class Dashboard extends Component {
         )
       
       case ANSWERED_QUESTION_FILTER :
+
+        console.log('questionFilter', questionFilter)
+
         return (
           userAnsweredQuestionIds
             .sort((a,b) => questions[b].timestamp - questions[a].timestamp)  
@@ -55,7 +63,7 @@ class Dashboard extends Component {
     const newFilter = event.target.value
     const newQuestions = this.sortAndFilterQuestions(newFilter)
 
-    console.log(newQuestions)
+    console.log('setState: newQuestions', newQuestions)
 
     this.setState({
       questionFilter: newFilter,
@@ -106,7 +114,12 @@ class Dashboard extends Component {
 }
 
 function mapStateToProps ({ questions, users, authedUser }) {
-   
+  
+  console.log('DASHBOARD: calling mapStateToProps...')
+  console.log('DASHBOARD: authUser Answers', JSON.stringify(Object.keys(users[authedUser.id].answers)) )
+  console.log('DASHBOARD: Questions ', questions )
+  console.log('DASHBOARD user questions: ', users[authedUser.id].questions)
+
   return {
     questions,
     userAnsweredQuestionIds: Object.keys(users[authedUser.id].answers) 

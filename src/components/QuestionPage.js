@@ -111,8 +111,6 @@ function mapStateToProps({ authedUser, users, questions }, props) {
 
     const { id } = props.match.params
 
-    console.log(questions[id])
-
     if (questions[id]) { 
 
         const question = questions[id];

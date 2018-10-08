@@ -1,6 +1,5 @@
 import React, { Component, Fragment } from 'react'
 import { connect } from 'react-redux'
-import { handleInitialData } from '../actions/shared'
 import { 
   BrowserRouter as Router,
   Route,
@@ -11,19 +10,16 @@ import NewQuestion from './NewQuestion'
 import LeaderboardPage from './LeaderboardPage'
 import QuestionPage from './QuestionPage'
 import Login from './Login'
+import AuthedUserInfo from './AuthedUserInfo'
 
 
 class App extends Component {
 
-  componentDidMount() {
-    this.props.dispatch(handleInitialData())
-  }
- 
   render() {
 
     const { authedUser } = this.props
 
-    if (authedUser === null) {
+    if (authedUser.id === null) {
       
       return <Login />
     
@@ -35,6 +31,7 @@ class App extends Component {
           <Fragment>
             <div className='container'>
               <Nav />
+              <AuthedUserInfo />
               {
                   this.props.loading === true
                   ? 'Loading...'
@@ -58,8 +55,8 @@ class App extends Component {
 
 function mapStateToProps ({authedUser}) {
   return {
-    loading: authedUser === null,
     authedUser,
+    loading: authedUser === null,
   }
 }
 
