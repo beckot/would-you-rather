@@ -4,24 +4,50 @@ import {
   BrowserRouter as Router,
   Route,
 } from 'react-router-dom'
-import Nav from './Nav'
+
 import Dashboard from './Dashboard'
 import NewQuestion from './NewQuestion'
 import LeaderboardPage from './LeaderboardPage'
 import QuestionPage from './QuestionPage'
 import Login from './Login'
-import AuthedUserInfo from './AuthedUserInfo'
+import Header from './Header'
 
+import CssBaseline from '@material-ui/core/CssBaseline'
+import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
+
+
+const theme = createMuiTheme({
+  palette: {
+    primary: {
+      main: '#6a1b9a',
+    },
+    secondary: {
+      main: '#00c853',
+    },
+  },
+});
 
 class App extends Component {
 
+  componentDidMount() {
+    this.props.dispatch(handleInitialData())
+  } 
+
+
   render() {
 
-    const { authedUser } = this.props
+    const { authedUser, users } = this.props
 
     if (authedUser.id === null) {
       
-      return <Login />
+      return (
+        <Fragment>
+          <CssBaseline />
+          <MuiThemeProvider theme={theme}>
+            <Login users={users} />
+          </MuiThemeProvider>
+        </Fragment>
+      )
     
     } else {
       
@@ -29,21 +55,18 @@ class App extends Component {
       
         <Router>
           <Fragment>
-            <div className='container'>
-              <Nav />
-              <AuthedUserInfo />
+            <CssBaseline />
+            <MuiThemeProvider theme={theme}>
+              <Header />
               {
-                  this.props.loading === true
-                  ? 'Loading...'
-                  : 
-                    <div>
-                        <Route exact path='/' component={Dashboard} />
-                        <Route path='/new' component={NewQuestion} />
-                        <Route path='/leaderboard' component={LeaderboardPage} />
-                        <Route path='/question/:id' component={QuestionPage} />  
-                    </div>
+                <div>
+                    <Route exact path='/' component={Dashboard} />
+                    <Route path='/new' component={NewQuestion} />
+                    <Route path='/leaderboard' component={LeaderboardPage} />
+                    <Route path='/question/:id' component={QuestionPage} />  
+                </div>
               }
-            </div>
+            </MuiThemeProvider>
           </Fragment>
         </Router>
       
@@ -53,10 +76,10 @@ class App extends Component {
   }
 }
 
-function mapStateToProps ({authedUser}) {
+function mapStateToProps ({authedUser, users}) {
   return {
     authedUser,
-    loading: authedUser === null,
+    users
   }
 }
 
